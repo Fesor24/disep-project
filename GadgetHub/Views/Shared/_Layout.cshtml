@@ -17,7 +17,7 @@
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container px-4 px-lg-5" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between">
-                <p class="navbar-brand" style="font-weight:800;padding-top:16px;font-size:1.4rem;" href="#!">Gadget<span class="text-danger">Hub</span></p>
+                <a class="navbar-brand" style="font-weight:800;font-size:1.4rem;" asp-controller="Home" asp-action="Index">Gadget<span class="text-danger">Hub</span></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
@@ -26,10 +26,10 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="color:black">
-                                <li><a class="dropdown-item" asp-controller="Product" asp-action="GetProducts" style="color:black">All Products</a></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="GetProducts" asp-route-category="" style="color:black">All Products</a></li>
                                 <li><hr class="dropdown-divider" /></li>
-                                <li><a class="dropdown-item" href="#!" style="color:black">Popular Items</a></li>
-                                <li><a class="dropdown-item" href="#!" style="color:black">New Arrivals</a></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="GetProducts" asp-route-category="highly-rated" style="color:black" style="color:black">Highly Rated</a></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="GetProducts" asp-route-category="new-release" style="color:black" style="color:black">New Arrivals</a></li>
                             </ul>
                         </li>
                     </ul>
