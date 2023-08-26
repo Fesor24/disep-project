@@ -1,0 +1,26 @@
+﻿@model ProductsCategoryViewModel
+
+
+<div class="container">
+    <div class="d-flex align-items-center justify-content-between py-3">
+        <h3 class="my-3 fw-bold">@Model.Category</h3>
+        <div>
+            @await Html.PartialAsync("SearchInput")
+        </div>
+
+
+
+    </div>
+
+    <div class="row">
+        @foreach (ProductsViewModel product in Model.Products)
+        {
+            @await Html.PartialAsync("ProductItem", product)
+            ;
+        }
+    </div>
+
+  
+</div>
+
+
