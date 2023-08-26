@@ -23,12 +23,15 @@ public class HomeController : Controller
             .Where(x => x.NewRelease)
             .Select(x => new ProductsViewModel
             {
+                Id = x.Id,
                 Name = x.Name,
-                Image = "https://localhost:7035" + x.Image.TrimStart('~'),
+                Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
                 Price = x.Price,
                 Description = x.Description,
                 NewRelease = x.NewRelease
-            }).ToListAsync();
+            })
+            .Take(8)
+            .ToListAsync();
 
         return View(newReleases);
     }
