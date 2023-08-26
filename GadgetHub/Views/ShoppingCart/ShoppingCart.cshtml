@@ -1,0 +1,33 @@
+﻿@model ShoppingCartViewModel
+
+<div class="container mt-4">
+    <h3 class="fw-bolder">Cart Summary</h3>
+
+    @if(Model.Items.Count > 0)
+    {
+        <table class="table table-striped">
+            <thead>
+            </thead>
+            <tbody>
+
+                @foreach (ShoppingCartItemViewModel item in Model.Items)
+                {
+                    @await Html.PartialAsync("CartSummaryItem", item)
+                }
+
+
+
+
+
+
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <h4 class="fw-bold" style="font-size:1.25rem">There are no items in your cart.</h4>
+    }
+
+    
+
+</div>
