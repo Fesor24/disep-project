@@ -6,11 +6,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext(builder.Configuration);
+//builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(1);
+});
+
+builder.Services.AddDbContext(builder.Configuration)
+    .RegisterServices();
 
 var app = builder.Build();
 
 await app.DatabaseInit();
+
+app.UseSession();
 
 //app.UseMiddleware<ExceptionMiddleware>();
 
