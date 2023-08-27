@@ -13,10 +13,10 @@
                     <span>₦@Model.Product.Price</span>
                 </div>
                 <p class="lead">@Model.Product.Description</p>
-                <form class="form-group" method="post" asp-controller="ShoppingCart" asp-action="AddItemToCart"
+                <form class="form-group" method="post" asp-controller="ShoppingCart" asp-action="AddItemToCartWithQuantity"
                       asp-route-id="@Model.Product.Id">
                     <div class="d-flex">
-                        <input class="form-control text-center me-3" name="itemQuantity" type="number" value="1" style="max-width: 3rem" />
+                        <input class="form-control text-center me-3 px-2" name="itemQuantity" type="number" value="1" min="1" style="width: 3.5rem" />
                         <button class="btn btn-outline-dark flex-shrink-0" >
                             <i class="bi-cart-fill me-1"></i>
                             Add to cart
