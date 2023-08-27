@@ -13,6 +13,14 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     {
         _context = context;
     }
+
+    public async Task<int> AddAsync(TEntity entity)
+    {
+        await _context.Set<TEntity>().AddAsync(entity);
+
+        return entity.Id;
+    }
+
     public async Task<List<TEntity>> GetAll()
     {
         return await _context.Set<TEntity>().ToListAsync();
