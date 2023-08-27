@@ -15,13 +15,35 @@
                     @await Html.PartialAsync("CartSummaryItem", item)
                 }
 
-
-
-
-
-
             </tbody>
         </table>
+
+        <div class="row my-5">
+            <div class="col-4 offset-8" style="border:1px solid gray;padding:30px 22px;border-radius:10%">
+                <p class="fw-bold" style="font-size:1.5rem">Checkout Summary</p>
+                <div class="d-flex flex-column py-4 justify-content-center">
+                    <div class="d-flex justify-content-between">
+                        <p>Subtotals</p>
+                        <p>₦@Model.StrSubTotals</p>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <p>Delivery charges</p>
+                        <p>₦@Model.StrDeliveryFee</p>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <p>Totals</p>
+                        <p>₦@Model.StrTotals</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-center">
+                    <a class="btn-custom" style="text-decoration:none" asp-controller="Order" asp-action="Index">
+                        Proceed To Checkout
+                    </a>
+                </div>
+                
+            </div>
+        </div>
     }
     else
     {
