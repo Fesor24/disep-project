@@ -15,6 +15,8 @@ public static class ServiceExtensions
 
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
+        services.AddScoped<IOrderService, OrderService>();
+
         return services;
     }
 }
