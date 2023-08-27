@@ -1,4 +1,5 @@
-﻿using GadgetHub.Models;
+﻿using GadgetHub.Entities;
+using GadgetHub.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GadgetHub.Data;
