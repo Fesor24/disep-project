@@ -1,63 +1,43 @@
-﻿using GadgetHub.Data;
-using GadgetHub.Models;
+﻿using GadgetHub.DataAccess.Abstractions;
+using GadgetHub.Entities;
 using GadgetHub.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GadgetHub.Controllers;
 public class ProductController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ProductController(ApplicationDbContext context)
+    public ProductController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ViewResult> GetProducts(string category)
     {
         ProductsCategoryViewModel products = new();
 
-        (products.Products, products.Category) = category switch
+        List<Product> product = new();
+
+        (product, products.Category) = category switch
         {
-            "highly-rated" => (await _context.Products.Where(x => x.Ratings > 3)
-            .Select(x => new ProductsViewModel
-            {
-                Id = x.Id,
-                Description = x.Description,
-                Name = x.Name,
-                Price = x.Price,
-                Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
-                NewRelease = x.NewRelease,
-                Ratings = x.Ratings
-            })
-            .ToListAsync(), "Highly Rated Products"),
+            "highly-rated" => (await _unitOfWork.ProductRepository.GetHighlyRatedProducts() , "Highly Rated Products"),
 
-            "new-release" => (await _context.Products.Where(x => x.NewRelease)
-            .Select(x => new ProductsViewModel
-            {
-                Id = x.Id,
-                Description = x.Description,
-                Name = x.Name,
-                Price = x.Price,
-                Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
-                NewRelease = x.NewRelease,
-                Ratings = x.Ratings
-            })
-            .ToListAsync(), "New Releases"),
+            "new-release" => (await _unitOfWork.ProductRepository.GetNewReleases(), "New Releases"),
 
-             _ => (await _context.Products
-            .Select(x => new ProductsViewModel
-            {   
-                Id = x.Id,
-                Description = x.Description,
-                Name = x.Name,
-                Price = x.Price,
-                Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
-                NewRelease = x.NewRelease,
-                Ratings = x.Ratings
-            }).ToListAsync(), "All Products")
+             _ => (await _unitOfWork.ProductRepository.GetAll(), "All Products")
         };
+
+        products.Products = product.Select(x => new ProductsViewModel
+        {
+            Id = x.Id,
+            Description = x.Description,
+            Name = x.Name,
+            Price = x.Price,
+            Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
+            NewRelease = x.NewRelease,
+            Ratings = x.Ratings
+        }).ToList();
 
 
         return View("Products",products);
@@ -67,28 +47,25 @@ public class ProductController : Controller
     {
         RelatedProductsViewModel relatedProduct = new();
 
-        relatedProduct.Product = await _context.Products
-            .Where(x => x.Id == id)
-            .Select(x => new ProductsViewModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description,
-                Price = x.Price,
-                Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
-                NewRelease = x.NewRelease,
-                Ratings = x.Ratings,
-                CategoryId = x.CategoryId
-            })
-            .FirstOrDefaultAsync();
+        Product product = await _unitOfWork.ProductRepository.GetById(id);
 
-        if(relatedProduct.Product is null)
+        if (product is null)
         {
             return View("NotFound");
         }
 
-        relatedProduct.RelatedProducts = await _context.Products
-            .Where(x => x.CategoryId == relatedProduct.Product.CategoryId)
+        relatedProduct.Product.NewRelease = product.NewRelease;
+        relatedProduct.Product.Name = product.Name;
+        relatedProduct.Product.Price = product.Price;
+        relatedProduct.Product.Id = product.Id;
+        relatedProduct.Product.Ratings = product.Ratings;
+        relatedProduct.Product.Image = Request.Scheme + "://" + Request.Host + product.Image.TrimStart('~');
+        relatedProduct.Product.CategoryId = product.CategoryId;
+        relatedProduct.Product.Description = product.Description;
+
+        List<Product> relatedProducts = await _unitOfWork.ProductRepository.GetRelatedProducts(product.CategoryId);
+
+        relatedProduct.RelatedProducts = relatedProducts
             .Select(x => new ProductsViewModel
             {
                 Name = x.Name,
@@ -100,8 +77,7 @@ public class ProductController : Controller
                 Id = x.Id,
                 NewRelease = x.NewRelease
             })
-            .Take(4)
-            .ToListAsync();
+            .ToList();
 
         return View("Product", relatedProduct);
     }
@@ -113,20 +89,19 @@ public class ProductController : Controller
 
         string searchName = Request.Form["Name"];
 
-        products.Products = await _context.Products
-            .Where(x => string.IsNullOrWhiteSpace(searchName) || x.Name.Contains(searchName))
-            .Select(x => new ProductsViewModel
-            {
-                Name = x.Name,
-                CategoryId = x.CategoryId,
-                Id = x.Id,
-                Price = x.Price,
-                Description = x.Description,
-                Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
-                NewRelease = x.NewRelease,
-                Ratings = x.Ratings
-            })
-            .ToListAsync();
+        List<Product> productList = await _unitOfWork.ProductRepository.Search(searchName);
+
+        products.Products = productList.Select(x => new ProductsViewModel
+        {
+            Name = x.Name,
+            CategoryId = x.CategoryId,
+            Id = x.Id,
+            Price = x.Price,
+            Description = x.Description,
+            Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
+            NewRelease = x.NewRelease,
+            Ratings = x.Ratings
+        }).ToList();
 
         products.Category = string.IsNullOrWhiteSpace(searchName) ? "All Products" : 
             $"Products related to '{searchName}'";

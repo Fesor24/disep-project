@@ -1,7 +1,7 @@
-﻿using GadgetHub.Data;
+﻿using GadgetHub.DataAccess.Abstractions;
+using GadgetHub.DataAccess.Implementation;
 using GadgetHub.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GadgetHub.Controllers;
 
@@ -9,18 +9,19 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
 
-    private readonly ApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+    public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IActionResult> Index()
     {
-        var newReleases = await _context.Products
-            .Where(x => x.NewRelease)
+        var newReleases = await _unitOfWork.ProductRepository.GetNewReleases();
+
+        var dataToReturn = newReleases
             .Select(x => new ProductsViewModel
             {
                 Id = x.Id,
@@ -31,9 +32,9 @@ public class HomeController : Controller
                 NewRelease = x.NewRelease
             })
             .Take(8)
-            .ToListAsync();
+            .ToList();
 
-        return View(newReleases);
+        return View(dataToReturn);
     }
 
     public IActionResult About()

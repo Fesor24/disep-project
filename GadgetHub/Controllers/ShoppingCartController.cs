@@ -1,21 +1,19 @@
-﻿using GadgetHub.Data;
+﻿using GadgetHub.DataAccess.Abstractions;
 using GadgetHub.Entities;
-using GadgetHub.Models;
 using GadgetHub.Services.Abstractions;
 using GadgetHub.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GadgetHub.Controllers;
 public class ShoppingCartController : Controller
 {
     private readonly IShoppingCartRepository _cartRepo;
-    private readonly ApplicationDbContext _context;
+    private readonly IShoppingCartService _shoppingCartService;
 
-    public ShoppingCartController(IShoppingCartRepository cartRepo, ApplicationDbContext context)
+    public ShoppingCartController(IShoppingCartRepository cartRepo, IShoppingCartService shoppingCartService)
     {
         _cartRepo = cartRepo;
-        _context = context;
+        _shoppingCartService = shoppingCartService;
     }
 
     public IActionResult Index()
@@ -53,27 +51,31 @@ public class ShoppingCartController : Controller
 
         string cartId = Guid.NewGuid().ToString();
 
-        var itemQuantityValues = Request.Form["itemQuantity"];
+        string basePath = Request.Scheme + "://" + Request.Host;
 
+        shoppingCart = await _shoppingCartService.AddItemToCart(shoppingCart, id, basePath);
+
+        _cartRepo.UpdateShoppingCart(HttpContext, shoppingCart);
+
+        return RedirectToAction("Index");
+    }
+
+    public async Task<RedirectToActionResult> AddItemToCartWithQuantity(int id)
+    {
         int itemQuantity = 1;
 
-        int.TryParse(itemQuantityValues[0], out itemQuantity);
-
-        if (shoppingCart is null)
+        if (Request.Form is not null && Request.Form.Count > 0)
         {
-            shoppingCart = new ShoppingCart(cartId);
+            var itemQuantityValues = Request.Form["itemQuantity"];
+
+            int.TryParse(itemQuantityValues[0], out itemQuantity);
         }
 
-        var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
+        var shoppingCart = _cartRepo.GetCart(HttpContext);
 
-        if(product is null)
-        {
-            return RedirectToAction("NotFound", "Home");
-        }
+        string basePath = Request.Scheme + "://" + Request.Host;
 
-        ShoppingCartItem cartItem = MapProductToShoppingCartItem(product, itemQuantity);
-
-        shoppingCart = AddOrUpdateShoppingCartItem(shoppingCart, cartItem, itemQuantity);
+        shoppingCart = await _shoppingCartService.AddItemToCart(shoppingCart, id, basePath, itemQuantity);
 
         var updatedCart = _cartRepo.UpdateShoppingCart(HttpContext, shoppingCart);
 
@@ -82,28 +84,13 @@ public class ShoppingCartController : Controller
 
     public async Task<RedirectToActionResult> DecrementItemFromCart(int id)
     {
-        var product = await _context.Products
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if(product is null)
-        {
-            return RedirectToAction("NotFound", "Home", id);
-        }
-
         var cart = _cartRepo.GetCart(HttpContext);
 
-        string cartId = Guid.NewGuid().ToString();
+        string basePath = Request.Scheme + "://" + Request.Host;
 
-        if(cart is null)
-        {
-            cart = new ShoppingCart(cartId);
-        }
+        cart = await _shoppingCartService.DecrementItemFromCart(cart, id, basePath);
 
-        ShoppingCartItem shoppingCartItem = MapProductToShoppingCartItem(product);
-
-        cart = DecrementOrRemoveItemFromCart(cart, shoppingCartItem);
-
-        cart = _cartRepo.UpdateShoppingCart(HttpContext, cart);
+        _cartRepo.UpdateShoppingCart(HttpContext, cart);
 
         return RedirectToAction("Index");
 
@@ -111,81 +98,14 @@ public class ShoppingCartController : Controller
 
     public async Task<RedirectToActionResult> DeleteItemFromCart(int id)
     {
-        var product = await _context.Products
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if(product is null)
-        {
-            return RedirectToAction("NotFound", "Home", id);
-        }
-
         var cart = _cartRepo.GetCart(HttpContext);
 
-        if(cart is null)
-        {
-            cart = new ShoppingCart(Guid.NewGuid().ToString());
-        }
+        string basePath = Request.Scheme + "://" + Request.Host;
 
-        ShoppingCartItem shoppingCartItem = MapProductToShoppingCartItem(product);
-
-        cart.Items = cart.Items.Where(x => x.Id != shoppingCartItem.Id).ToList();
+        cart = await _shoppingCartService.DeleteItemFromCart(cart, id, basePath);
 
         cart = _cartRepo.UpdateShoppingCart(HttpContext, cart);
 
         return RedirectToAction("Index");
-    }
-
-    private ShoppingCart AddOrUpdateShoppingCartItem(ShoppingCart cart, ShoppingCartItem item, int quantity = 1)
-    {
-        var cartItem = cart.Items.Find(x => x.Id == item.Id);
-
-        if(cartItem is null)
-        {
-            cart.Items.Add(item);
-
-            return cart;
-        }
-
-        cart.Items.First(x => x.Id == item.Id).Quantity+=quantity;
-
-        return cart;
-    }
-
-    private ShoppingCart DecrementOrRemoveItemFromCart(ShoppingCart cart, ShoppingCartItem item)
-    {
-        var cartItem = cart.Items.FirstOrDefault(x => x.Id == item.Id);
-
-        if (cartItem is not null)
-        {
-            if(cartItem.Quantity > 1)
-            {
-                cart.Items.FirstOrDefault(x => x.Id == item.Id).Quantity--;
-
-                return cart;
-            }
-            else
-            {
-                cart.Items.Remove(cartItem);
-
-                return cart;
-            }
-        }
-
-        return cart;
-    }
-
-    private ShoppingCartItem MapProductToShoppingCartItem(Product product, int quantity = 1)
-    {
-        ShoppingCartItem cartItem = new()
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Image = Request.Scheme + "://" + Request.Host + product.Image.TrimStart('~'),
-            Price = product.Price,
-            CategoryId = product.CategoryId,
-            Quantity = quantity
-        };
-
-        return cartItem;
     }
 }
