@@ -34,6 +34,7 @@ public class ProductController : Controller
             Description = x.Description,
             Name = x.Name,
             Price = x.Price,
+            StrPrice = FormatPrice(x.Price),
             Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
             NewRelease = x.NewRelease,
             Ratings = x.Ratings
@@ -57,6 +58,7 @@ public class ProductController : Controller
         relatedProduct.Product.NewRelease = product.NewRelease;
         relatedProduct.Product.Name = product.Name;
         relatedProduct.Product.Price = product.Price;
+        relatedProduct.Product.StrPrice = FormatPrice(product.Price);
         relatedProduct.Product.Id = product.Id;
         relatedProduct.Product.Ratings = product.Ratings;
         relatedProduct.Product.Image = Request.Scheme + "://" + Request.Host + product.Image.TrimStart('~');
@@ -71,6 +73,7 @@ public class ProductController : Controller
                 Name = x.Name,
                 Description = x.Description,
                 Price = x.Price,
+                StrPrice = FormatPrice(x.Price),
                 CategoryId = x.CategoryId,
                 Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
                 Ratings = x.Ratings,
@@ -89,6 +92,8 @@ public class ProductController : Controller
 
         string searchName = Request.Form["Name"];
 
+        string orderValue = Request.Form["Order"];
+
         List<Product> productList = await _unitOfWork.ProductRepository.Search(searchName);
 
         products.Products = productList.Select(x => new ProductsViewModel
@@ -97,15 +102,28 @@ public class ProductController : Controller
             CategoryId = x.CategoryId,
             Id = x.Id,
             Price = x.Price,
+            StrPrice = FormatPrice(x.Price),
             Description = x.Description,
             Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
             NewRelease = x.NewRelease,
             Ratings = x.Ratings
         }).ToList();
 
+        products.Products = orderValue switch
+        {
+            "desc" => products.Products.OrderByDescending(x => x.Price),
+            "asc" => products.Products.OrderBy(x => x.Price),
+            _ => products.Products.OrderBy(x => x.Price)
+        };
+
         products.Category = string.IsNullOrWhiteSpace(searchName) ? "All Products" : 
             $"Products related to '{searchName}'";
 
         return View("Products",products);
+    }
+
+    private static string FormatPrice(float price)
+    {
+        return $"{price:n0}";
     }
 }

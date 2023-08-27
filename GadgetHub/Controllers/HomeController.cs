@@ -28,6 +28,7 @@ public class HomeController : Controller
                 Name = x.Name,
                 Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
                 Price = x.Price,
+                StrPrice = FormatPrice(x.Price),
                 Description = x.Description,
                 NewRelease = x.NewRelease
             })
@@ -40,5 +41,10 @@ public class HomeController : Controller
     public IActionResult About()
     {
         return View();
+    }
+
+    private static string FormatPrice(float price)
+    {
+        return $"{price:n0}";
     }
 }

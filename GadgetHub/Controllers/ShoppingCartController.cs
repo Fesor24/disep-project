@@ -34,13 +34,21 @@ public class ShoppingCartController : Controller
             {
                 Id = x.Id,
                 Name = x.Name,
-                Price = x.Price,
                 Quantity = x.Quantity,
                 Image = x.Image,
-                SubTotal = x.Quantity * x.Price,
+                Price = x.Quantity * x.Price,
+                StrPrice = FormatPrice(x.Quantity * x.Price),
                 CategoryId = x.CategoryId,
             }).ToList()
         };
+
+        scvm.SubTotals = scvm.Items.Sum(x => x.Price);
+
+        scvm.StrSubTotals = FormatPrice(scvm.SubTotals);
+
+        scvm.StrTotals = FormatPrice(scvm.Totals);
+
+        scvm.StrDeliveryFee = FormatPrice(scvm.DeliveryCharges);
 
         return View("ShoppingCart", scvm);
     }
@@ -107,5 +115,10 @@ public class ShoppingCartController : Controller
         cart = _cartRepo.UpdateShoppingCart(HttpContext, cart);
 
         return RedirectToAction("Index");
+    }
+
+    private static string FormatPrice(float price)
+    {
+        return $"{price:n0}";
     }
 }
