@@ -1,7 +1,12 @@
 ﻿
 <form class="form-group" role="form" method="post" asp-controller="Product" asp-action="Search">
     <div class="d-flex align-items-center">
-        <input class="form-control" name="Name" type="text" />
+        <input class="form-control me-2" name="Name" type="text" placeholder="Search by name" />
+        <select class="form-control" name="Order">
+            <option value="">Select option</option>
+            <option value="desc">High - Low</option>
+            <option value="asc">Low - High</option>
+        </select>
         <button class="btn-custom ms-2">Search</button>
     </div>
 
