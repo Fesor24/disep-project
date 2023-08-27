@@ -1,6 +1,7 @@
 ﻿using GadgetHub.Data;
 using GadgetHub.Data.DataSeed;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GadgetHub.Extensions;
 
@@ -18,7 +19,12 @@ public static class ApplicationExtensions
             {
                 var context = services.GetRequiredService<ApplicationDbContext>();
 
-                await context.Database.MigrateAsync();
+                string inMemoryDb = app.Configuration["InMemoryDb"];
+
+                if(inMemoryDb.IsNullOrEmpty() || inMemoryDb != "true")
+                {
+                    await context.Database.MigrateAsync();
+                }
 
                 await DataSeed.PopulateAsync(context, loggerFactory);
             }
@@ -26,18 +32,34 @@ public static class ApplicationExtensions
             {
                 var logger = loggerFactory.CreateLogger<Program>();
 
-                logger.LogError("An error occurred. Details:{error}", ex.StackTrace);
+                logger.LogError($"An error occurred. Details:{ex.Message} {ex.StackTrace}");
             }
         }
     }
 
     public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration config)
     {
-        services.AddDbContext<ApplicationDbContext>(options =>
-        {
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection"));
-        });
+        string useInMemoryDb = config["InMemoryDb"];
 
+        if (useInMemoryDb.IsNullOrEmpty())
+        {
+            return services;
+        }
+
+        if(useInMemoryDb == "true")
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseInMemoryDatabase("GadgetHub");
+            });
+        }
+        else
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+            });
+        }
         return services;
     }
 }
