@@ -10,7 +10,7 @@
                 <div class="small mb-1">SKU: BST-498</div>
                 <h1 class="display-5 fw-bolder">@Model.Product.Name</h1>
                 <div class="fs-5 mb-5">
-                    <span>₦@Model.Product.Price</span>
+                    <span>₦@Model.Product.StrPrice</span>
                 </div>
                 <p class="lead">@Model.Product.Description</p>
                 <form class="form-group" method="post" asp-controller="ShoppingCart" asp-action="AddItemToCartWithQuantity"
@@ -46,7 +46,7 @@
                                 <!-- Product name-->
                                 <h5 class="fw-bolder">@product.Name</h5>
                                 <!-- Product price-->
-                                <span>₦@product.Price</span>
+                                <span>₦@product.StrPrice</span>
                             </div>
                         </div>
                         <!-- Product actions-->
