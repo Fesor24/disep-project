@@ -34,10 +34,10 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
             .ToListAsync();
     }
 
-    public async Task<List<Product>> Search(string serahcParam)
+    public async Task<List<Product>> Search(string searchParam)
     {
         return await _context.Products
-            .Where(x => string.IsNullOrWhiteSpace(serahcParam) || x.Name.Contains(serahcParam))
+            .Where(x => string.IsNullOrWhiteSpace(searchParam) || x.Name.Contains(searchParam))
             .ToListAsync();
     }
 }
