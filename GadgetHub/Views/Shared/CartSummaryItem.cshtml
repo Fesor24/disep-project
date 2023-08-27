@@ -28,7 +28,7 @@ border-radius:50%;background-color:black;color:white;"
 
             <a class="text-center d-flex justify-content-center align-items-center" style="text-decoration:none;height:2rem;width:2rem;
 border-radius:50%;background-color:black;color:white;"
-               asp-controller="ShoppingCart" asp-action="GetProduct" asp-route-id="@Model.Id">
+               asp-controller="ShoppingCart" asp-action="DecrementItemFromCart" asp-route-id="@Model.Id">
 
 
                 <i class="fa-solid fa-minus"></i>
@@ -38,7 +38,7 @@ border-radius:50%;background-color:black;color:white;"
     <td>
         <a class="text-center d-flex justify-content-center align-items-center me-5" style="text-decoration:none;height:2rem;width:2rem;
 border-radius:50%;background-color:black;color:white;margin-top:12px"
-           asp-controller="ShoppingCart" asp-action="GetProduct" asp-route-id="5">
+           asp-controller="ShoppingCart" asp-action="DeleteItemFromCart" asp-route-id="@Model.Id">
 
 
             <i class="fa-solid fa-trash"></i>
