@@ -10,7 +10,7 @@ public class ShoppingCartItemViewModel
 
     public float Price { get; set; }
 
-    public float SubTotal { get; set; }
+    public string StrPrice { get; set; }
 
     public int Quantity { get; set; }
 

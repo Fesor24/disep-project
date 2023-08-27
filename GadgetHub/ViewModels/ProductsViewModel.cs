@@ -12,6 +12,8 @@ public class ProductsViewModel
 
     public float Price { get; set; }
 
+    public string StrPrice { get; set; }
+
     public string Image { get; set; }
 
     public int Ratings { get; set; }
