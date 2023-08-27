@@ -2,7 +2,7 @@
 
 public class RelatedProductsViewModel
 {
-    public ProductsViewModel Product { get; set; }
+    public ProductsViewModel Product { get; set; } = new();
 
-    public List<ProductsViewModel> RelatedProducts { get; set; }
+    public List<ProductsViewModel> RelatedProducts { get; set; } = new();
 }
