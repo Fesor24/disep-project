@@ -11,9 +11,11 @@ public class UnitOfWork : IUnitOfWork
     {
         _context = context;
         ProductRepository = new ProductRepository(context);
+        OrderRepository = new OrderRepository(context);
     }
 
     public IProductRepository ProductRepository { get; set; }
+    public IOrderRepository OrderRepository { get; set; }
 
     public async Task<int> Complete()
     {
