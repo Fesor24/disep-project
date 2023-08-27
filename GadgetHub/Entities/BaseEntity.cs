@@ -1,4 +1,4 @@
-﻿namespace GadgetHub.Models;
+﻿namespace GadgetHub.Entities;
 
 public abstract class BaseEntity
 {
@@ -6,5 +6,5 @@ public abstract class BaseEntity
 
     public DateTimeOffset DateCreated { get; set; }
 
-    public DateTimeOffset DateUpdated { get; set;}
+    public DateTimeOffset DateUpdated { get; set; }
 }

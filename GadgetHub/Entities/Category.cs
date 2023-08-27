@@ -1,4 +1,4 @@
-﻿namespace GadgetHub.Models;
+﻿namespace GadgetHub.Entities;
 
 public class Category : BaseEntity
 {
