@@ -1,12 +1,13 @@
 ﻿using GadgetHub.Entities;
+using GadgetHub.Entities.Identity;
 using GadgetHub.Entities.OrderAggregate;
-using GadgetHub.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace GadgetHub.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions options): base(options)
     {
