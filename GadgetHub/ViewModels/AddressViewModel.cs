@@ -18,4 +18,6 @@ public class AddressViewModel
 
     [Required(ErrorMessage = "State is required")]
     public string State { get; set; }
+
+    public string Email { get; set; } = string.Empty;
 }
