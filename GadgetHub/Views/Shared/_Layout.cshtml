@@ -34,14 +34,15 @@
                         </li>
                     </ul>
                     <div class="d-flex align-items-center">
+                        <div class="me-5">
+                            @await Component.InvokeAsync("CartSummary")
+                        </div>
 
-                        @await Component.InvokeAsync("CartItemSummary")
+                        <div>
+                            <partial name="_LoginPartialView" />
+                        </div>
                     
-                        <button class="btn btn-outline-dark ms-lg-2" type="submit">
-                            
-                            Sign in
-                            
-                        </button>
+                       
                     </div>
                 </div>
             </div>
