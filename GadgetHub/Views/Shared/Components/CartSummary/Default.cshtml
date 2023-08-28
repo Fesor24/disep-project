@@ -1,0 +1,14 @@
+﻿@model ShoppingCartViewModel
+
+
+
+@* <a class="btn btn-outline-dark" asp-controller="ShoppingCart" asp-action="Index">
+    <i class="bi-cart-fill me-1"></i>
+    Cart
+    <span class="badge bg-dark text-white ms-1 rounded-pill">@Model.Items.Count</span>
+</a> *@
+
+<a asp-controller="ShoppingCart" asp-action="Index" style="position:relative">
+    <i class="fa-solid fa-1x fa-cart-shopping" style="font-size:1.6rem;color:black"></i>
+    <span class="badge bg-dark text-white ms-1 rounded-pill" style="position:absolute;top:-13px;right:-8px">@Model.Items.Count</span>
+</a>
