@@ -1,5 +1,4 @@
 using GadgetHub.Extensions;
-using GadgetHub.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +13,8 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddDbContext(builder.Configuration)
-    .RegisterServices();
+    .RegisterServices()
+    .AddAuthenticaton(builder.Configuration);
 
 var app = builder.Build();
 
