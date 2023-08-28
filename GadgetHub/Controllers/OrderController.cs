@@ -39,6 +39,8 @@ public class OrderController : Controller
 
         var (orderCreated, orderViewModel) = await _orderService.CreateOrderAsync(cart, model, email);
 
+        orderViewModel.Address.Email = email;
+
         if (orderCreated)
         {
             _shoppingCartRepo.DeleteShoppingCart(HttpContext);
