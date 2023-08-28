@@ -14,4 +14,6 @@ public class RegisterViewModel
     [Required(ErrorMessage = "Display name is required")]
     [DataType(DataType.Password)]
     public string Password { get; set; }
+
+    public string ReturnUrl { get; set; }
 }
