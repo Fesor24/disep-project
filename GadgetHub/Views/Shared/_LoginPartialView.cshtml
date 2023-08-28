@@ -1,0 +1,23 @@
+﻿@using GadgetHub.Entities.Identity;
+@using System.Security.Claims;
+@inject SignInManager<ApplicationUser> signInManager;
+
+@if (signInManager.IsSignedIn(User))
+{
+    <div class="d-flex align-items-center">
+        <p class="me-3 mt-2 pe-2">Hello <strong>@User.FindFirst(x => x.Type == "dsp").Value</strong></p>
+
+        <form method="post" asp-controller="Account" asp-action="Logout">
+            <button type="submit" class="btn-danger px-4 py-1" style="border-radius:12px;">Logout</button>
+        </form>
+    </div>
+   
+}
+else
+{
+    <a class="btn btn-outline-dark ms-lg-2" type="submit" asp-controller="Account" asp-action="Login">
+
+        Sign in
+
+    </a>
+}
