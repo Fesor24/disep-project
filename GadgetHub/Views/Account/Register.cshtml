@@ -9,6 +9,9 @@
             {
                 <p>@ViewData["errorMessage"]</p>
             }
+
+            <input asp-for="ReturnUrl" hidden />
+
             <div class="col-6">
                 <label asp-for="DisplayName"></label>
                 <input asp-for="DisplayName" type="text" class="form-control" />
