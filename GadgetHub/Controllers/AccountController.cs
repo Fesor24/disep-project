@@ -65,9 +65,11 @@ public class AccountController : Controller
         return LocalRedirect(model.ReturnUrl);
     }
 
-    public IActionResult Register()
+    public IActionResult Register(string returnUrl = null)
     {
         RegisterViewModel rvm = new();
+
+        rvm.ReturnUrl = returnUrl;
 
         return View(rvm);
     }
@@ -79,6 +81,8 @@ public class AccountController : Controller
         {
             return View("Register", model);
         }
+
+        model.ReturnUrl ??= "~/";
 
         var user = new ApplicationUser
         {
@@ -101,10 +105,10 @@ public class AccountController : Controller
 
             await _signInManager.SignInWithClaimsAsync(user, true, claims);
 
-            return LocalRedirect("~/");
+            return LocalRedirect(model.ReturnUrl);
         }
 
-        return View();
+        return View(model);
     }
 
     [HttpPost]
