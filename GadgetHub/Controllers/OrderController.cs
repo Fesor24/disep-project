@@ -1,7 +1,9 @@
 ﻿using GadgetHub.DataAccess.Abstractions;
 using GadgetHub.Services.Abstractions;
 using GadgetHub.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace GadgetHub.Controllers;
@@ -16,12 +18,14 @@ public class OrderController : Controller
         _orderService = orderService;
     }
 
+    [Authorize]
     public IActionResult Index()
     {
         return View();
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CreateOrder(AddressViewModel model)
     {
         if(!ModelState.IsValid)
@@ -31,7 +35,9 @@ public class OrderController : Controller
 
         var cart = _shoppingCartRepo.GetCart(HttpContext);
 
-        var (orderCreated, orderViewModel) = await _orderService.CreateOrderAsync(cart, model, "fes@mail.com");
+        string email = User.FindFirstValue(ClaimTypes.Email);
+
+        var (orderCreated, orderViewModel) = await _orderService.CreateOrderAsync(cart, model, email);
 
         if (orderCreated)
         {
