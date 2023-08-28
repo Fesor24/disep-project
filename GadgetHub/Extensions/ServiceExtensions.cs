@@ -17,6 +17,8 @@ public static class ServiceExtensions
 
         services.AddScoped<IOrderService, OrderService>();
 
+        services.AddScoped<ITokenService, TokenService>();
+
         return services;
     }
 }
