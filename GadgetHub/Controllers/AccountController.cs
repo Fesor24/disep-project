@@ -1,5 +1,4 @@
 ﻿using GadgetHub.Entities.Identity;
-using GadgetHub.Services.Abstractions;
 using GadgetHub.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,14 +9,11 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly ITokenService _tokenService;
 
-    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-        ITokenService tokenService)
+    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _tokenService = tokenService;
     }
     public IActionResult Login(string returnUrl = null)
     {
@@ -95,8 +91,6 @@ public class AccountController : Controller
 
         if (identityResult.Succeeded)
         {
-            _tokenService.CreateToken(user);
-
             var claims = new List<Claim>
             {
                 new Claim("dsp", user.DisplayName),
