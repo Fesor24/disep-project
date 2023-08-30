@@ -6,6 +6,8 @@ public class Order : BaseEntity
 
     public OrderStatus OrderStatus { get; set; }
 
+    public PaymentStatus PaymentStatus { get; set; }
+
     public Address DeliveryAddress { get; set; }
 
     public float SubTotal { get; set; }
