@@ -3,7 +3,6 @@ using GadgetHub.Entities;
 using GadgetHub.Entities.OrderAggregate;
 using GadgetHub.Services.Abstractions;
 using GadgetHub.ViewModels;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GadgetHub.Services.Implementation;
 
@@ -47,7 +46,7 @@ public class OrderService : IOrderService
             order.OrderItems.Add(orderItem);
         }
 
-        order.OrderStatus = OrderStatus.Shipped;
+        order.OrderStatus = OrderStatus.Pending;
 
         order.SubTotal = cart.Items.Sum(x => x.Price * x.Quantity);
 
@@ -64,7 +63,7 @@ public class OrderService : IOrderService
             City = address.City
         };
 
-        int orderId = await _unitOfWork.OrderRepository.AddAsync(order);
+        await _unitOfWork.OrderRepository.AddAsync(order);
 
         var changes = await _unitOfWork.Complete();
 
@@ -72,6 +71,7 @@ public class OrderService : IOrderService
         {
             OrderViewModel orderViewModel = new()
             {
+                OrderId = order.Id,
                 Address = new AddressViewModel
                 {
                     City = order.DeliveryAddress.City,
@@ -83,7 +83,8 @@ public class OrderService : IOrderService
                 OrderStatus = order.OrderStatus,
                 Subtotal = FormatPrice(order.SubTotal),
                 DeliveryCharges = FormatPrice(order.DeliveryCharges),
-                Total = FormatPrice(order.SubTotal + order.DeliveryCharges),
+                Total = order.SubTotal + order.DeliveryCharges,
+                StrTotal = FormatPrice(order.SubTotal + order.DeliveryCharges),
             };
 
             foreach(var item in order.OrderItems)
