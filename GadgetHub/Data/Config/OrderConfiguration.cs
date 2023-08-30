@@ -19,5 +19,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.OrderStatus)
             .HasConversion(c => c.ToString(),
             p => (OrderStatus)Enum.Parse(typeof(OrderStatus), p));
+
+        builder.Property(x => x.PaymentStatus)
+            .HasConversion(c => c.ToString(),
+            p => (PaymentStatus)Enum.Parse(typeof(PaymentStatus), p));
     }
 }
