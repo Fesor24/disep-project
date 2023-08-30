@@ -12,10 +12,13 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
         ProductRepository = new ProductRepository(context);
         OrderRepository = new OrderRepository(context);
+        PaymentTransactionRepository = new PaymentTransactionRepository(context);
     }
 
     public IProductRepository ProductRepository { get; set; }
     public IOrderRepository OrderRepository { get; set; }
+
+    public IPaymentTransactionRepository PaymentTransactionRepository { get; set; }
 
     public async Task<int> Complete()
     {
