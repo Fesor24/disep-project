@@ -11,11 +11,16 @@ public class OrderController : Controller
 {
     private readonly IShoppingCartRepository _shoppingCartRepo;
     private readonly IOrderService _orderService;
+    private readonly IPaymentService _paymentService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public OrderController(IShoppingCartRepository shoppingCartRepo, IOrderService orderService)
+    public OrderController(IShoppingCartRepository shoppingCartRepo, IOrderService orderService,
+        IPaymentService paymentService, IUnitOfWork unitOfWork)
     {
         _shoppingCartRepo = shoppingCartRepo;
         _orderService = orderService;
+        _paymentService = paymentService;
+        _unitOfWork = unitOfWork;
     }
 
     [Authorize]
@@ -28,6 +33,8 @@ public class OrderController : Controller
     [Authorize]
     public async Task<IActionResult> CreateOrder(AddressViewModel model)
     {
+        string redirectUrl = "";
+
         if(!ModelState.IsValid)
         {
             return View("Index",model);
@@ -43,24 +50,78 @@ public class OrderController : Controller
 
         if (orderCreated)
         {
+            var result = await _paymentService.InitializeAsync(new Models.Payment
+            {
+                Amount = orderViewModel.Total,
+                CallbackUrl = $"{Request.Scheme}://{Request.Host}/order/orderconfirmed",
+                Email = email,
+                OrderId = orderViewModel.OrderId
+            });
+
+            redirectUrl = result.AuthorizationUrl;
+
             _shoppingCartRepo.DeleteShoppingCart(HttpContext);
         }
 
         HttpContext.Session.SetString("order", JsonSerializer.Serialize(orderViewModel));
 
-        return RedirectToAction("OrderConfirmed");
+        return Redirect(redirectUrl);
     }
 
-    public IActionResult OrderConfirmed()
+    public async Task<IActionResult> OrderConfirmed(string trxref = null, string reference = null)
     {
-        var order = HttpContext.Session.GetString("order");
+        var result = await _paymentService.VerifyAsync(reference);
 
-        if(order == null)
+        OrderViewModel orderViewModel = new();
+
+        if (result.Successful)
         {
-            return View();
+            var paymentTransaction = await _unitOfWork.PaymentTransactionRepository.GetByReferenceAsync(reference);
+
+            if (paymentTransaction is null)
+            {
+                return View("NotFound");
+            }
+
+            var orderId = paymentTransaction.OrderId;
+
+            var order = await _unitOfWork.OrderRepository.GetById(orderId);
+
+            if(order is null)
+            {
+                return View("NotFound");
+            };
+
+            order.PaymentStatus = Entities.OrderAggregate.PaymentStatus.Paid;
+
+            order.OrderStatus = Entities.OrderAggregate.OrderStatus.Shipped;
+
+            paymentTransaction.Verified = true;
+
+            _unitOfWork.PaymentTransactionRepository.Update(paymentTransaction);
+
+            _unitOfWork.OrderRepository.Update(order);
+
+            _unitOfWork.Complete();
+
+            var ovm = HttpContext.Session.GetString("order");
+
+            if (ovm == null)
+            {
+                return View();
+            }
+
+            orderViewModel = JsonSerializer.Deserialize<OrderViewModel>(ovm);
+
+            orderViewModel.PaymentStatus = order.PaymentStatus;
+
+            orderViewModel.OrderStatus = order.OrderStatus;
         }
 
-        var orderViewModel = JsonSerializer.Deserialize<OrderViewModel>(order);
+        else
+        {
+            return View("Error");
+        }
 
         return View(orderViewModel);
     }
