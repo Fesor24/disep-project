@@ -29,6 +29,7 @@ public class HomeController : Controller
                 Image = Request.Scheme + "://" + Request.Host + x.Image.TrimStart('~'),
                 Price = x.Price,
                 StrPrice = FormatPrice(x.Price),
+                Ratings = x.Ratings,
                 Description = x.Description,
                 NewRelease = x.NewRelease
             })
