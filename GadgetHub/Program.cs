@@ -13,7 +13,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddDbContext(builder.Configuration)
-    .RegisterServices()
+    .RegisterServices(builder.Configuration)
     .AddAuthenticaton(builder.Configuration);
 
 var app = builder.Build();
