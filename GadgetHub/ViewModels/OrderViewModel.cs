@@ -12,7 +12,13 @@ public class OrderViewModel
 
     public string DeliveryCharges { get; set; }
 
-    public string Total { get; set; }
+    public string StrTotal { get; set; }
+
+    public float Total { get; set; }
+
+    public int OrderId { get; set; }
+
+    public PaymentStatus PaymentStatus { get; set; }
 
     public List<OrderItemViewModel> OrderItems { get; set; } = new();
 }
