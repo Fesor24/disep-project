@@ -50,40 +50,63 @@ public class OrderController : Controller
 
         if (orderCreated)
         {
-            var result = await _paymentService.InitializeAsync(new Models.Payment
-            {
-                Amount = orderViewModel.Total,
-                CallbackUrl = $"{Request.Scheme}://{Request.Host}/order/orderconfirmed",
-                Email = email,
-                OrderId = orderViewModel.OrderId
-            });
+            // Uncomment if you want to add paystack as a payment provider
+            // Provide your secret key in appsettings if you want to use it
 
-            redirectUrl = result.AuthorizationUrl;
+            //var result = await _paymentService.InitializeAsync(new Models.Payment
+            //{
+            //    Amount = orderViewModel.Total,
+            //    CallbackUrl = $"{Request.Scheme}://{Request.Host}/order/orderconfirmed",
+            //    Email = email,
+            //    OrderId = orderViewModel.OrderId
+            //});
+
+            //redirectUrl = result.AuthorizationUrl;
 
             _shoppingCartRepo.DeleteShoppingCart(HttpContext);
+
+            HttpContext.Session.SetString("orderId", orderViewModel.OrderId.ToString());
         }
 
         HttpContext.Session.SetString("order", JsonSerializer.Serialize(orderViewModel));
 
-        return Redirect(redirectUrl);
+
+        // Uncomment if you using paystack
+        //return Redirect(redirectUrl);
+
+        return RedirectToAction(nameof(OrderConfirmed));
     }
 
     public async Task<IActionResult> OrderConfirmed(string trxref = null, string reference = null)
     {
-        var result = await _paymentService.VerifyAsync(reference);
+
+        // Uncomment if you using paystack
+        // This verifies the payment by the user
+        //var result = await _paymentService.VerifyAsync(reference);
 
         OrderViewModel orderViewModel = new();
 
-        if (result.Successful)
+        // Replace true with result(the commented variable above)
+        // Remove true and in its stead, write result.Suceeded
+
+        if (true)
         {
-            var paymentTransaction = await _unitOfWork.PaymentTransactionRepository.GetByReferenceAsync(reference);
+            //var paymentTransaction = await _unitOfWork.PaymentTransactionRepository.GetByReferenceAsync(reference);
 
-            if (paymentTransaction is null)
-            {
-                return View("NotFound");
-            }
+            //if (paymentTransaction is null)
+            //{
+            //    return View("NotFound");
+            //}
 
-            var orderId = paymentTransaction.OrderId;
+            //var orderId = paymentTransaction.OrderId;
+
+
+            // Comment next two lines if you using paystack
+            var strOrderId = HttpContext.Session.GetString("orderId");
+
+            int orderId;
+
+            int.TryParse(strOrderId, out orderId);    
 
             var order = await _unitOfWork.OrderRepository.GetById(orderId);
 
@@ -96,9 +119,9 @@ public class OrderController : Controller
 
             order.OrderStatus = Entities.OrderAggregate.OrderStatus.Shipped;
 
-            paymentTransaction.Verified = true;
+            //paymentTransaction.Verified = true;
 
-            _unitOfWork.PaymentTransactionRepository.Update(paymentTransaction);
+            //_unitOfWork.PaymentTransactionRepository.Update(paymentTransaction);
 
             _unitOfWork.OrderRepository.Update(order);
 
@@ -118,10 +141,11 @@ public class OrderController : Controller
             orderViewModel.OrderStatus = order.OrderStatus;
         }
 
-        else
-        {
-            return View("Error");
-        }
+        // Uncomment if using paystack
+        //else
+        //{
+        //    return View("Error");
+        //}
 
         return View(orderViewModel);
     }
