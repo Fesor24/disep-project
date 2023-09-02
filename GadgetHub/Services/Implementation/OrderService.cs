@@ -8,15 +8,13 @@ namespace GadgetHub.Services.Implementation;
 
 public class OrderService : IOrderService
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public OrderService(IUnitOfWork unitOfWork)
+    public OrderService()
     {
-        _unitOfWork = unitOfWork;
+     
     }
 
-    public async Task<(bool OrderCreated, OrderViewModel orderViewModel)> CreateOrderAsync(ShoppingCart cart, 
-        AddressViewModel address, string customerEmail)
+    public async Task<(bool OrderCreated, OrderViewModel orderViewModel)> CreateOrderAsync(IUnitOfWork unitOfWork,
+        ShoppingCart cart, AddressViewModel address, string customerEmail)
     {
         Order order = new();
 
@@ -24,7 +22,7 @@ public class OrderService : IOrderService
 
         foreach(var item in cart.Items)
         {
-            var product = _unitOfWork.ProductRepository.GetById(item.Id);
+            var product = unitOfWork.ProductRepository.GetById(item.Id);
 
             if(product is null)
             {
@@ -63,9 +61,9 @@ public class OrderService : IOrderService
             City = address.City
         };
 
-        await _unitOfWork.OrderRepository.AddAsync(order);
+        await unitOfWork.OrderRepository.AddAsync(order);
 
-        var changes = await _unitOfWork.Complete();
+        var changes = await unitOfWork.Complete();
 
         if(changes > 1)
         {

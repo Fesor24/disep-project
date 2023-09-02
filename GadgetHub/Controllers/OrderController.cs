@@ -44,7 +44,7 @@ public class OrderController : Controller
 
         string email = User.FindFirstValue(ClaimTypes.Email);
 
-        var (orderCreated, orderViewModel) = await _orderService.CreateOrderAsync(cart, model, email);
+        var (orderCreated, orderViewModel) = await _orderService.CreateOrderAsync(_unitOfWork,cart, model, email);
 
         orderViewModel.Address.Email = email;
 
